@@ -26,17 +26,9 @@ namespace SynthFromScratch
 
             float frequency;
 
-            switch (key)    // setting frequency according to the key pressed
+            if (!frequencies.TryGetValue(key, out frequency))
             {
-                case Keys.Q:
-                    frequency = 110f;
-                    break;
-                case Keys.W:
-                    frequency = 150f;
-                    break;
-                default:
-                    frequency = 440f;
-                    break;
+                frequency = 440f;
             }
 
             // mininal sufficient number of samples: number of samples in one wave

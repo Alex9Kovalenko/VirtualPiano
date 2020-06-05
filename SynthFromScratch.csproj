@@ -50,6 +50,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="LoopStream.cs" />
     <Compile Include="Synth.cs">
       <SubType>Form</SubType>
