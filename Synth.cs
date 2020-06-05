@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Media;
 using System.IO;
-using System.Windows.Input;
+using NAudio.Wave;
+using System.Collections.Generic;
 
 namespace SynthFromScratch
 {
@@ -18,7 +11,7 @@ namespace SynthFromScratch
         private const int SAMPLE_RATE = 44100;
         private const short BITS_PER_SAMPLE = 16;
 
-        private Dictionary<Keys, SoundPlayer> keysDown = new Dictionary<Keys, SoundPlayer>();
+        private readonly Dictionary<Keys, WaveOut> keysDown = new Dictionary<Keys, WaveOut>();
 
         public Synth()
         {
@@ -29,9 +22,24 @@ namespace SynthFromScratch
         {
             Keys key = e.KeyCode;
 
-            if (keysDown.ContainsKey(key)) return;
+            if (keysDown.ContainsKey(key)) return;  // if the key is already down
 
-            float frequency = 78f;
+            float frequency;
+
+            switch (key)    // setting frequency according to the key pressed
+            {
+                case Keys.Q:
+                    frequency = 110f;
+                    break;
+                case Keys.W:
+                    frequency = 150f;
+                    break;
+                default:
+                    frequency = 440f;
+                    break;
+            }
+
+            // mininal sufficient number of samples: number of samples in one wave
             int numSamples = Convert.ToInt32(Math.Ceiling((double)SAMPLE_RATE / frequency));
 
             short[] wave = new short[numSamples];
@@ -69,20 +77,24 @@ namespace SynthFromScratch
 
             memoryStream.Position = 0;
 
-            SoundPlayer sp = new SoundPlayer(memoryStream);
+            WaveFileReader reader = new WaveFileReader(memoryStream);
+            LoopStream loop = new LoopStream(reader);
+            WaveOut waveOut = new WaveOut();
+            waveOut.Init(loop);
+            waveOut.Play();
 
-            sp.PlayLooping();
-
-            keysDown.Add(key, sp);
+            keysDown.Add(key, waveOut);
         }
 
         private void Synth_KeyUp(object sender, KeyEventArgs e)
         {
             Keys key = e.KeyCode;
 
-            if (keysDown.TryGetValue(key, out SoundPlayer sp))
+            if (keysDown.TryGetValue(key, out WaveOut waveOut))
             {
-                sp.Stop();
+                waveOut.Stop();
+                waveOut.Dispose();
+
                 keysDown.Remove(key);
             }
         }
