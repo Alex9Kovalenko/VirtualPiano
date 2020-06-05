@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System.IO;
 using NAudio.Wave;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace SynthFromScratch
 {
@@ -28,7 +29,7 @@ namespace SynthFromScratch
 
             if (!frequencies.TryGetValue(key, out frequency))
             {
-                frequency = 440f;
+                return;
             }
 
             // mininal sufficient number of samples: number of samples in one wave
@@ -88,6 +89,46 @@ namespace SynthFromScratch
                 waveOut.Dispose();
 
                 keysDown.Remove(key);
+            }
+        }
+
+        private void Synth_Paint(object sender, PaintEventArgs e)
+        {
+            const int indent = 10;
+
+            Graphics gObject = CreateGraphics();
+            Pen pen = new Pen(new SolidBrush(Color.Black), 3);
+
+            gObject.DrawRectangle(new Pen(new SolidBrush(Color.Aqua)),
+                indent, indent, ClientRectangle.Width - 2 * indent, ClientRectangle.Height - 2 * indent);
+
+            const int numWhiteKeys = 10;
+            int whiteKeyWidth = (ClientRectangle.Width - 2 * indent) / numWhiteKeys;
+            int whiteKeyHeight = Convert.ToInt32(0.8 * ClientRectangle.Height);
+
+            int blackKeyWidth = whiteKeyWidth / 2;
+            int blackKeyHeight = Convert.ToInt32(0.6 * whiteKeyHeight);
+
+            int topKeyboardPos = ClientRectangle.Height - indent - whiteKeyHeight;
+
+            for (int i = 0; i < numWhiteKeys; ++i)
+            {
+                int leftKeyPos = indent + i * whiteKeyWidth;
+
+                // drawing white keys
+                gObject.DrawRectangle(pen,
+                    leftKeyPos, topKeyboardPos, whiteKeyWidth, whiteKeyHeight);
+
+                int r = (i + 1) % 7;
+                if (r == 3 || r == 0 || i == numWhiteKeys - 1)
+                {
+                    continue;
+                }
+                else
+                {
+                    gObject.DrawRectangle(pen,
+                        leftKeyPos + Convert.ToInt32(0.75 * whiteKeyWidth), topKeyboardPos, blackKeyWidth, blackKeyHeight);
+                }
             }
         }
     }

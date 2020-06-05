@@ -28,14 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Synth));
             this.SuspendLayout();
             // 
             // Synth
             // 
-            resources.ApplyResources(this, "$this");
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(804, 462);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "Synth";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Synth";
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Synth_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Synth_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Synth_KeyUp);
             this.ResumeLayout(false);
