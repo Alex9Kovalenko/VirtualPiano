@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
 using System.IO;
+using System.Windows.Input;
 
 namespace SynthFromScratch
 {
@@ -17,6 +18,8 @@ namespace SynthFromScratch
         private const int SAMPLE_RATE = 44100;
         private const short BITS_PER_SAMPLE = 16;
 
+        private Dictionary<Keys, SoundPlayer> keysDown = new Dictionary<Keys, SoundPlayer>();
+
         public Synth()
         {
             InitializeComponent();
@@ -24,12 +27,17 @@ namespace SynthFromScratch
 
         private void Synth_KeyDown(object sender, KeyEventArgs e)
         {
-            short[] wave = new short[SAMPLE_RATE];
-            byte[] binaryWave = new byte[SAMPLE_RATE * sizeof(short)];
+            Keys key = e.KeyCode;
 
-            float frequency = 440f;
+            if (keysDown.ContainsKey(key)) return;
 
-            for (int i = 0; i < SAMPLE_RATE; ++i)
+            float frequency = 78f;
+            int numSamples = Convert.ToInt32(Math.Ceiling((double)SAMPLE_RATE / frequency));
+
+            short[] wave = new short[numSamples];
+            byte[] binaryWave = new byte[numSamples * sizeof(short)];
+
+            for (int i = 0; i < numSamples; ++i)
             {
                 wave[i] = Convert.ToInt16(short.MaxValue * Math.Sin(Math.PI * 2 * frequency * i / SAMPLE_RATE));
             }
@@ -40,7 +48,7 @@ namespace SynthFromScratch
             BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
 
             short blockAlign = BITS_PER_SAMPLE / 8; // bytes per sample
-            int subChunk2Size = SAMPLE_RATE * blockAlign;   // number of bytes of the data
+            int subChunk2Size = numSamples * blockAlign;   // number of bytes of the data
 
             binaryWriter.Write(new[] { 'R', 'I', 'F', 'F' });
             binaryWriter.Write(36 + subChunk2Size); // 4 + (8 + SubChunk1Size == 16) + (8 + SubChunk2Size)
@@ -61,7 +69,22 @@ namespace SynthFromScratch
 
             memoryStream.Position = 0;
 
-            new SoundPlayer(memoryStream).Play();
+            SoundPlayer sp = new SoundPlayer(memoryStream);
+
+            sp.PlayLooping();
+
+            keysDown.Add(key, sp);
+        }
+
+        private void Synth_KeyUp(object sender, KeyEventArgs e)
+        {
+            Keys key = e.KeyCode;
+
+            if (keysDown.TryGetValue(key, out SoundPlayer sp))
+            {
+                sp.Stop();
+                keysDown.Remove(key);
+            }
         }
     }
 }

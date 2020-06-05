@@ -37,6 +37,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Name = "Synth";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Synth_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Synth_KeyUp);
             this.ResumeLayout(false);
 
         }
