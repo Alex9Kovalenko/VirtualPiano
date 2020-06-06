@@ -159,6 +159,24 @@ namespace SynthFromScratch
                         leftKeyPos + Convert.ToInt32(0.75 * whiteKeyWidth), topKeyboardPos, blackKeyWidth, blackKeyHeight);
                 }
             }
+
+            if (pressedKeys != null)
+            {
+                Tuple<float, int> noteData;
+                foreach (Keys key in pressedKeys)
+                {
+                    if (notes.TryGetValue(key, out noteData) && noteData.Item2 < 0)
+                    {
+                        // drawing pressed black keys
+                        gObject.FillRectangle(new SolidBrush(Color.Gray),
+                            indent + (-noteData.Item2 - 1) * whiteKeyWidth + Convert.ToInt32(0.75 * whiteKeyWidth), topKeyboardPos, blackKeyWidth, blackKeyHeight);
+
+                        // drawing black borders of pressed black keys
+                        gObject.DrawRectangle(pen,
+                            indent + (-noteData.Item2 - 1) * whiteKeyWidth + Convert.ToInt32(0.75 * whiteKeyWidth), topKeyboardPos, blackKeyWidth, blackKeyHeight);
+                    }
+                }
+            }
         }
 
         private void Synth_Shown(object sender, EventArgs e)
