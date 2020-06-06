@@ -39,9 +39,10 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Synth";
+            this.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Synth";
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Synth_Paint);
+            this.Shown += new System.EventHandler(this.Synth_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Synth_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Synth_KeyUp);
             this.ResumeLayout(false);

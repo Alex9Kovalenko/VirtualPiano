@@ -4,6 +4,7 @@ using System.IO;
 using NAudio.Wave;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace SynthFromScratch
 {
@@ -14,9 +15,13 @@ namespace SynthFromScratch
 
         private readonly Dictionary<Keys, WaveOut> keysDown = new Dictionary<Keys, WaveOut>();
 
+        private Graphics gObject;
+
         public Synth()
         {
             InitializeComponent();
+
+            gObject = CreateGraphics();
         }
 
         private void Synth_KeyDown(object sender, KeyEventArgs e)
@@ -25,12 +30,14 @@ namespace SynthFromScratch
 
             if (keysDown.ContainsKey(key)) return;  // if the key is already down
 
-            float frequency;
+            Tuple<float, int> noteData;
 
-            if (!frequencies.TryGetValue(key, out frequency))
+            if (!notes.TryGetValue(key, out noteData))
             {
                 return;
             }
+
+            float frequency = noteData.Item1;
 
             // mininal sufficient number of samples: number of samples in one wave
             int numSamples = Convert.ToInt32(Math.Ceiling((double)SAMPLE_RATE / frequency));
@@ -77,6 +84,8 @@ namespace SynthFromScratch
             waveOut.Play();
 
             keysDown.Add(key, waveOut);
+
+            DrawKeyboard();
         }
 
         private void Synth_KeyUp(object sender, KeyEventArgs e)
@@ -90,19 +99,22 @@ namespace SynthFromScratch
 
                 keysDown.Remove(key);
             }
+
+            DrawKeyboard();
         }
 
-        private void Synth_Paint(object sender, PaintEventArgs e)
+        private void DrawKeyboard()
         {
+            gObject.Clear(Color.White);
+
             const int indent = 10;
 
-            Graphics gObject = CreateGraphics();
             Pen pen = new Pen(new SolidBrush(Color.Black), 3);
 
             gObject.DrawRectangle(new Pen(new SolidBrush(Color.Aqua)),
                 indent, indent, ClientRectangle.Width - 2 * indent, ClientRectangle.Height - 2 * indent);
 
-            const int numWhiteKeys = 10;
+            const int numWhiteKeys = 10;    // hardcoded because depends on the hardware (only 10 keys at the bottom row)
             int whiteKeyWidth = (ClientRectangle.Width - 2 * indent) / numWhiteKeys;
             int whiteKeyHeight = Convert.ToInt32(0.8 * ClientRectangle.Height);
 
@@ -110,6 +122,22 @@ namespace SynthFromScratch
             int blackKeyHeight = Convert.ToInt32(0.6 * whiteKeyHeight);
 
             int topKeyboardPos = ClientRectangle.Height - indent - whiteKeyHeight;
+
+            Keys[] pressedKeys = keysDown.Keys.ToArray();
+
+            if (pressedKeys != null)
+            {
+                Tuple<float, int> noteData;
+                foreach (Keys key in pressedKeys)
+                {
+                    if (notes.TryGetValue(key, out noteData) && noteData.Item2 > 0)
+                    {  
+                        // drawing pressed white keys
+                        gObject.FillRectangle(new SolidBrush(Color.Gray),
+                            indent + (noteData.Item2 - 1) * whiteKeyWidth, topKeyboardPos, whiteKeyWidth, whiteKeyHeight);
+                    }
+                }
+            }
 
             for (int i = 0; i < numWhiteKeys; ++i)
             {
@@ -126,10 +154,16 @@ namespace SynthFromScratch
                 }
                 else
                 {
-                    gObject.DrawRectangle(pen,
+                    // drawing black keys
+                    gObject.FillRectangle(pen.Brush,
                         leftKeyPos + Convert.ToInt32(0.75 * whiteKeyWidth), topKeyboardPos, blackKeyWidth, blackKeyHeight);
                 }
             }
+        }
+
+        private void Synth_Shown(object sender, EventArgs e)
+        {
+            DrawKeyboard();
         }
     }
 }
