@@ -47,7 +47,12 @@ namespace SynthFromScratch
 
             for (int i = 0; i < numSamples; ++i)
             {
-                wave[i] = Convert.ToInt16(short.MaxValue * Math.Sin(Math.PI * 2 * frequency * i / SAMPLE_RATE));
+                // wave[i] = Convert.ToInt16(short.MaxValue * Math.Sin(Math.PI * 2 * frequency * i / SAMPLE_RATE)); // sin
+                wave[i] = Convert.ToInt16(short.MaxValue * Math.Sign(Math.Sin(Math.PI * 2 * frequency * i / SAMPLE_RATE))); // square
+                // wave[i] = Convert.ToInt16(short.MaxValue * ((double)i / SAMPLE_RATE - Math.Floor((double)i / SAMPLE_RATE)));
+                
+                // stopped at coding the sawtooth
+                // TODO: create a checkbox for choosing the waveform
             }
 
             Buffer.BlockCopy(wave, 0, binaryWave, 0, wave.Length * sizeof(short));
